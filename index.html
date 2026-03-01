@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HYLEX.AI | Neural Engine Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Space+Grotesk:wght@300;500&display=swap" rel="stylesheet">
+    <style>
+        body { background: #000; color: #fff; font-family: 'Space Grotesk', sans-serif; min-height: 100vh; margin: 0; }
+        .orbitron { font-family: 'Orbitron', sans-serif; }
+        .spinning-ring-wrapper { position: relative; padding: 8px; border-radius: 50%; width: 220px; height: 220px; display: flex; align-items: center; justify-content: center; background: rgba(79, 70, 229, 0.05); box-shadow: 0 0 80px rgba(79, 70, 229, 0.2); margin: 40px auto; }
+        .spinning-ring-wrapper::before { content: ''; position: absolute; width: 100%; height: 100%; border-radius: 50%; background: conic-gradient(transparent, #4f46e5, #00ffff, #9333ea, transparent 70%); animation: rotate-ring 1.5s linear infinite; }
+        @keyframes rotate-ring { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .inner-core { position: relative; width: 96%; height: 96%; background: #000; border-radius: 50%; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .video-container { width: 100%; max-width: 350px; aspect-ratio: 16/9; background: #050505; border: 2px solid #4f46e5; border-radius: 20px; overflow: hidden; margin: 20px auto; display: none; box-shadow: 0 0 40px rgba(79, 69, 229, 0.5); }
+        .clip-item { border: 1px solid rgba(79, 70, 229, 0.3); padding: 15px; margin-bottom: 25px; background: rgba(10, 10, 10, 0.9); border-radius: 15px; }
+        .badge-4k { background: rgba(34, 197, 94, 0.15); border: 1px solid #22c55e; color: #22c55e; padding: 3px 10px; border-radius: 6px; font-size: 9px; font-weight: 900; display: inline-block; margin-bottom: 10px; }
+        .btn-action { background: linear-gradient(135deg, #4f46e5, #9333ea); color: white; padding: 12px; border-radius: 10px; font-size: 11px; font-weight: 800; text-transform: uppercase; width: 100%; cursor: pointer; border: none; }
+    </style>
+</head>
+<body class="py-10 px-5">
+    <div class="text-center mb-4"><h1 class="orbitron text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-indigo-400 to-purple-600">HYLEX.AI</h1></div>
+    <div class="spinning-ring-wrapper">
+        <div class="inner-core">
+            <input type="text" id="videoLink" placeholder="PASTE YOUTUBE URL" class="bg-transparent text-center border-b border-indigo-500 outline-none text-[10px] w-4/5 mb-6 text-white orbitron">
+            <button onclick="startNeuralEngine()" id="execBtn" class="bg-white text-black font-black px-8 py-3 rounded-full text-[10px] tracking-[3px] uppercase">EXECUTE ENGINE</button>
+        </div>
+    </div>
+    <div id="videoResult" class="video-container"><video id="hylex-main-video" controls playsinline crossorigin="anonymous"></video></div>
+    <div id="resultsContainer" class="max-w-md mx-auto mt-12"></div>
+    <script>
+        const WEBHOOK_URL = "https://hook.eu1.make.com/x3wg5svjqkm6d3jndjwqadtzcoieoxtp";
+        async function startNeuralEngine() {
+            const btn = document.getElementById('execBtn');
+            const link = document.getElementById('videoLink').value;
+            if(!link) return;
+            btn.innerHTML = "NEURAL SYNCING...";
+            btn.disabled = true;
+            try {
+                const response = await fetch(WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ youtube_link: link }) });
+                const data = await response.json();
+                displayResults(data.video_url, data.ai_data);
+            } catch (e) { alert("Neural Sync Error. Check Scenario."); resetEngine(); }
+        }
+        function displayResults(videoUrl, aiResponse) {
+            const container = document.getElementById('resultsContainer');
+            document.getElementById('videoResult').style.display = 'block';
+            document.getElementById('hylex-main-video').src = videoUrl;
+            let clips = (typeof aiResponse === 'string') ? JSON.parse(aiResponse.match(/\[.*\]/s)[0]) : aiResponse;
+            let html = "";
+            clips.forEach((clip) => {
+                let startTime = clip.time ? clip.time.split('-')[0].trim() : "0";
+                html += `<div class="clip-item"><span class="badge-4k">4K V-SHIELD</span><h3 class="orbitron text-[12px] font-black uppercase mb-2">VIRAL SEGMENT 🔥</h3>
+                <div style="width:100%; aspect-ratio:9/16; background:#000; border-radius:15px; overflow:hidden;"><video style="width:100%; height:100%; object-fit:cover;" src="${videoUrl}#t=${startTime}" autoplay muted loop playsinline crossorigin="anonymous"></video></div>
+                <button onclick="navigator.clipboard.writeText('${clip.tags}')" class="btn-action mt-4">COPY TAGS</button></div>`;
+            });
+            container.innerHTML = html;
+            resetEngine();
+        }
+        function resetEngine() { document.getElementById('execBtn').innerHTML = "EXECUTE ENGINE"; document.getElementById('execBtn').disabled = false; }
+    </script>
+</body>
+</html>
